@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niit.springboot.mapper.ArticleMapper">
+
+    <resultMap id="BaseResultMap" type="com.niit.springboot.entity.Article">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="category" property="category" />
+        <result column="content" property="content" />
+        <result column="summary" property="summary" />
+        <result column="cover_image" property="coverImage" />
+        <result column="author_id" property="authorId" />
+        <result column="author_name" property="authorName" />
+        <result column="view_count" property="viewCount" />
+        <result column="like_count" property="likeCount" />
+        <result column="collect_count" property="collectCount" />
+        <result column="comment_count" property="commentCount" />
+        <result column="status" property="status" />
+        <result column="is_top" property="isTop" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="publish_time" property="publishTime" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <resultMap id="ListResultMap" type="com.niit.springboot.dto.response.ArticleListResponse">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="category" property="category" />
+        <result column="summary" property="summary" />
+        <result column="cover_image" property="coverImage" />
+        <result column="author_name" property="authorName" />
+        <result column="view_count" property="viewCount" />
+        <result column="like_count" property="likeCount" />
+        <result column="comment_count" property="commentCount" />
+        <result column="is_top" property="isTop" />
+        <result column="publish_time" property="publishTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, title, category, content, summary, cover_image,
+        author_id, author_name, view_count, like_count, collect_count,
+        comment_count, status, is_top, is_deleted,
+        publish_time, create_time, update_time
+    </sql>
+
+    <sql id="List_Column_List">
+        id, title, category, summary, cover_image,
+        author_name, view_count, like_count, comment_count,
+        is_top, publish_time
+    </sql>
+
+    <!-- 插入文章 -->
+    <insert id="insert" parameterType="com.niit.springboot.entity.Article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO articles (
+        title, category, content, summary, cover_image,
+        author_id, author_name, view_count, like_count, collect_count,
+        comment_count, status, is_top, is_deleted,
+        publish_time, create_time, update_time
+        ) VALUES (
+        #{title}, #{category}, #{content}, #{summary}, #{coverImage},
+        #{authorId}, #{authorName}, 0, 0, 0, 0,
+        #{status}, #{isTop}, 0,
+        <if test="publishTime != null">#{publishTime},</if>
+        <if test="publishTime == null">NOW(),</if>
+        NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM articles
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 更新文章 -->
+    <update id="update" parameterType="com.niit.springboot.entity.Article">
+        UPDATE articles
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="summary != null">summary = #{summary},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="isTop != null">is_top = #{isTop},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 逻辑删除 -->
+    <update id="deleteById">
+        UPDATE articles
+        SET is_deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 增加阅读量 -->
+    <update id="incrementViewCount">
+        UPDATE articles
+        SET view_count = view_count + 1
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 更新点赞数 -->
+    <update id="updateLikeCount">
+        UPDATE articles
+        SET like_count = like_count + #{increment}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 获取文章列表 -->
+    <select id="selectArticleList" resultMap="ListResultMap">
+        SELECT <include refid="List_Column_List" />
+        FROM articles
+        WHERE status = 1 AND is_deleted = 0
+        ORDER BY is_top DESC, publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 根据分类获取文章 -->
+    <select id="selectArticlesByCategory" resultMap="ListResultMap">
+        SELECT <include refid="List_Column_List" />
+        FROM articles
+        WHERE category = #{category} AND status = 1 AND is_deleted = 0
+        ORDER BY is_top DESC, publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 获取用户文章 -->
+    <select id="selectArticlesByAuthor" resultMap="ListResultMap">
+        SELECT <include refid="List_Column_List" />
+        FROM articles
+        WHERE author_id = #{authorId} AND status = 1 AND is_deleted = 0
+        ORDER BY is_top DESC, publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 置顶/取消置顶 -->
+    <update id="toggleTop">
+        UPDATE articles
+        SET is_top = #{isTop}, update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 统计总数 -->
+    <select id="countArticles" resultType="int">
+        SELECT COUNT(*)
+        FROM articles
+        WHERE status = 1 AND is_deleted = 0
+    </select>
+
+    <!-- 统计分类文章数 -->
+    <select id="countArticlesByCategory" resultType="int">
+        SELECT COUNT(*)
+        FROM articles
+        WHERE category = #{category} AND status = 1 AND is_deleted = 0
+    </select>
+
+    <!-- 统计用户文章数 -->
+    <select id="countArticlesByAuthor" resultType="int">
+        SELECT COUNT(*)
+        FROM articles
+        WHERE author_id = #{authorId} AND status = 1 AND is_deleted = 0
+    </select>
+
+</mapper>

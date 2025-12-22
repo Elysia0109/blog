@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niit.springboot.mapper.CommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.niit.springboot.entity.Comment">
+        <id column="id" property="id" />
+        <result column="article_id" property="articleId" />
+        <result column="user_id" property="userId" />
+        <result column="parent_id" property="parentId" />
+        <result column="content" property="content" />
+        <result column="like_count" property="likeCount" />
+        <result column="status" property="status" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <resultMap id="ResponseResultMap" type="com.niit.springboot.dto.response.CommentResponse">
+        <id column="id" property="id" />
+        <result column="article_id" property="articleId" />
+        <result column="user_id" property="userId" />
+        <result column="username" property="username" />
+        <result column="avatar" property="avatar" />
+        <result column="content" property="content" />
+        <result column="like_count" property="likeCount" />
+        <result column="create_time" property="createTime" />
+        <result column="parent_id" property="parentId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, article_id, user_id, parent_id, content,
+        like_count, status, is_deleted, create_time, update_time
+    </sql>
+
+    <!-- 插入评论 -->
+    <insert id="insert" parameterType="com.niit.springboot.entity.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comments (
+            article_id, user_id, parent_id, content,
+            like_count, status, is_deleted, create_time, update_time
+        ) VALUES (
+                     #{articleId}, #{userId}, #{parentId}, #{content},
+                     0, 1, 0, NOW(), NOW()
+                 )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM comments
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 根据文章ID查询评论 -->
+    <select id="selectByArticleId" resultMap="ResponseResultMap">
+        SELECT c.id, c.article_id, c.user_id, c.parent_id,
+               c.content, c.like_count, c.create_time,
+               u.username, u.avatar
+        FROM comments c
+                 LEFT JOIN users u ON c.user_id = u.id
+        WHERE c.article_id = #{articleId}
+          AND c.status = 1
+          AND c.is_deleted = 0
+          AND u.is_deleted = 0
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 更新评论 -->
+    <update id="update" parameterType="com.niit.springboot.entity.Comment">
+        UPDATE comments
+        <set>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 逻辑删除 -->
+    <update id="deleteById">
+        UPDATE comments
+        SET is_deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 统计文章评论数 -->
+    <select id="countByArticleId" resultType="int">
+        SELECT COUNT(*)
+        FROM comments
+        WHERE article_id = #{articleId}
+          AND status = 1
+          AND is_deleted = 0
+    </select>
+
+</mapper>

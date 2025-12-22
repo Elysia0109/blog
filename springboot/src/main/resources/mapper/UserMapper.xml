@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niit.springboot.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.niit.springboot.entity.User">
+        <id column="id" property="id" />
+        <result column="account" property="account" />
+        <result column="username" property="username" />
+        <result column="nickname" property="nickname" />
+        <result column="password" property="password" />
+        <result column="avatar" property="avatar" />
+        <result column="email" property="email" />
+        <result column="status" property="status" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, account, username, nickname, password, avatar,
+        email, status, is_deleted, create_time, update_time
+    </sql>
+
+    <!-- 插入用户 -->
+    <insert id="insert" parameterType="com.niit.springboot.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (
+            account, username, nickname, password, avatar,
+            email, status, is_deleted, create_time, update_time
+        ) VALUES (
+                     #{account}, #{username}, #{nickname}, #{password}, #{avatar},
+                     #{email}, #{status}, 0, NOW(), NOW()
+                 )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM users
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 根据账号查询 -->
+    <select id="selectByAccount" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM users
+        WHERE account = #{account} AND is_deleted = 0
+    </select>
+
+    <!-- 更新用户信息 -->
+    <update id="update" parameterType="com.niit.springboot.entity.User">
+        UPDATE users
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 逻辑删除 -->
+    <update id="deleteById">
+        UPDATE users
+        SET is_deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 检查账号是否存在 -->
+    <select id="countByAccount" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE account = #{account} AND is_deleted = 0
+    </select>
+
+    <!-- 修改密码 -->
+    <update id="updatePassword">
+        UPDATE users
+        SET password = #{password}, update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+</mapper>

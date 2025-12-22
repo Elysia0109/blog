@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niit.springboot.mapper.FavoriteMapper">
+
+    <resultMap id="BaseResultMap" type="com.niit.springboot.entity.Favorite">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="article_id" property="articleId" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 添加收藏 -->
+    <insert id="insert" parameterType="com.niit.springboot.entity.Favorite" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO favorites (user_id, article_id, create_time)
+        VALUES (#{userId}, #{articleId}, NOW())
+    </insert>
+
+    <!-- 删除收藏 -->
+    <delete id="delete">
+        DELETE FROM favorites
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </delete>
+
+    <!-- 检查是否已收藏 -->
+    <select id="existsByUserAndArticle" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM favorites
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </select>
+
+    <!-- 获取用户收藏的文章ID列表 -->
+    <select id="selectArticleIdsByUser" resultType="java.lang.Integer">
+        SELECT article_id
+        FROM favorites
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 获取文章的收藏数量 -->
+    <select id="countByArticle" resultType="int">
+        SELECT COUNT(*)
+        FROM favorites
+        WHERE article_id = #{articleId}
+    </select>
+
+    <!-- 获取用户的收藏数量 -->
+    <select id="countByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM favorites
+        WHERE user_id = #{userId}
+    </select>
+</mapper>
