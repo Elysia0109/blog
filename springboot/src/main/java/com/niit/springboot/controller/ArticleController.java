@@ -2,7 +2,6 @@ package com.niit.springboot.controller;
 
 import com.niit.springboot.dto.request.ArticleRequest;
 import com.niit.springboot.dto.response.ApiResponse;
-import com.niit.springboot.entity.Article;
 import com.niit.springboot.service.ArticleService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

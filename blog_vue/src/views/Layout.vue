@@ -5,7 +5,7 @@
       <div class="header-container">
         <!-- Logo -->
         <div class="logo">
-          <el-image src="" style="width: 100px" fit="contain" />
+          <el-image src="https://ts1.tc.mm.bing.net/th/id/OIP-C.XEkMn3xE4iFIzIB5DNE9fgHaHa?w=193&h=193&c=8&rs=1&qlt=90&o=6&cb=ucfimg1&dpr=1.1&pid=3.1&rm=2&ucfimg=1" style="width: 100px" fit="contain" />
         </div>
 
         <!-- 导航菜单 -->
