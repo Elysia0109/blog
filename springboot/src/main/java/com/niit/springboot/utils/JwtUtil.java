@@ -16,7 +16,6 @@ public class JwtUtil {
     @Value("${jwt.expiration:86400000}") // 24小时
     private Long expiration;
 
-    // 使用固定的密钥，确保每次应用重启后都能验证之前生成的token
     private final SecretKey signingKey;
 
     public JwtUtil() {
@@ -29,7 +28,6 @@ public class JwtUtil {
         return signingKey;
     }
 
-    // 修改方法签名：第一个参数改为Integer
     public String generateToken(Integer userId, String account) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
@@ -44,7 +42,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 解析Token的方法保持不变
     public Claims parseToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())

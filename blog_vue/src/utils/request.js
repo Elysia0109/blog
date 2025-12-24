@@ -7,19 +7,15 @@ const request = axios.create({
     timeout: 10000,
 });
 
-// 请求拦截器 - 增强版本
 request.interceptors.request.use(config => {
     console.log('[Request] URL:', config.url)
     console.log('[Request] Method:', config.method)
 
-    // 获取并清理token
     let token = localStorage.getItem('token')
 
-    // 调试信息
     console.log('[Request] Raw token from localStorage:', token)
     console.log('[Request] Token type:', typeof token)
 
-    // 清理无效的token
     if (token === 'undefined' || token === 'null' || token === '' || token === undefined) {
         console.warn('[Request] Invalid token detected, clearing...')
         localStorage.removeItem('token')
@@ -28,18 +24,15 @@ request.interceptors.request.use(config => {
         token = null
     }
 
-    // 只有在有有效token时才设置Authorization头
-    if (token && token.length > 10) { // JWT token通常较长
+    if (token && token.length > 10) {
         config.headers.Authorization = `Bearer ${token}`
         console.log('[Request] Authorization header set, length:', token.length)
         console.log('[Request] Authorization preview:', token.substring(0, 30) + '...')
     } else {
         console.warn('[Request] No valid token available')
-        // 清除可能存在的无效header
         delete config.headers.Authorization
     }
 
-    // 打印最终headers
     console.log('[Request] Final headers:', {
         ...config.headers,
         Authorization: config.headers.Authorization ? '[HIDDEN]' : 'Not set'
@@ -51,7 +44,6 @@ request.interceptors.request.use(config => {
     return Promise.reject(error)
 });
 
-// 响应拦截器 - 增强版本
 request.interceptors.response.use(response => {
     console.log('[Response] Status:', response.status)
     console.log('[Response] URL:', response.config.url)
@@ -59,17 +51,14 @@ request.interceptors.response.use(response => {
 
     const res = response.data
 
-    // 如果返回的是文件流等特殊类型，直接返回
     if (response.config.responseType === 'blob' ||
         response.config.responseType === 'arraybuffer') {
         return res
     }
 
-    // 处理业务逻辑状态码
     if (res.code !== undefined && res.code !== 200) {
         console.warn('[Response] Business error:', res)
 
-        // 401未授权
         if (res.code === 401) {
             ElMessage.error(res.message || '登录已过期，请重新登录')
 
@@ -78,7 +67,6 @@ request.interceptors.response.use(response => {
             localStorage.removeItem('userId')
             localStorage.removeItem('userInfo')
 
-            // 跳转到登录页
             setTimeout(() => {
                 if (router.currentRoute.value.path !== '/login') {
                     router.push('/login')
@@ -107,7 +95,6 @@ request.interceptors.response.use(response => {
             method: error.response.config?.method
         })
 
-        // 处理HTTP状态码
         switch (error.response.status) {
             case 401:
                 ElMessage.error('未授权，请重新登录')
@@ -115,7 +102,6 @@ request.interceptors.response.use(response => {
                 localStorage.removeItem('userId')
                 localStorage.removeItem('userInfo')
 
-                // 避免重复跳转
                 if (router.currentRoute.value.path !== '/login') {
                     setTimeout(() => {
                         router.push('/login')
@@ -139,7 +125,6 @@ request.interceptors.response.use(response => {
                 ElMessage.error(`请求失败 (${error.response.status})`)
         }
 
-        // 返回错误信息，方便组件处理
         return Promise.reject({
             code: error.response.status,
             message: error.response.data?.message || error.response.statusText,
@@ -147,12 +132,10 @@ request.interceptors.response.use(response => {
         })
 
     } else if (error.request) {
-        // 请求已发送但没有收到响应
         console.error('[Response] No response received:', error.request)
         ElMessage.error('网络连接异常，请检查网络设置')
 
     } else {
-        // 请求配置错误
         console.error('[Response] Request config error:', error.message)
         ElMessage.error('请求配置错误: ' + error.message)
     }
@@ -160,7 +143,6 @@ request.interceptors.response.use(response => {
     return Promise.reject(error)
 });
 
-// 添加工具方法
 request.getToken = function() {
     const token = localStorage.getItem('token')
     return token && token !== 'undefined' && token !== 'null' ? token : null
@@ -173,7 +155,6 @@ request.clearAuth = function() {
     console.log('[Auth] Cleared authentication data')
 }
 
-// 测试token是否有效
 request.isAuthenticated = function() {
     const token = this.getToken()
     return !!token && token.length > 10

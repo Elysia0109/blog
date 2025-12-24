@@ -25,12 +25,10 @@ public class JwtInterceptor implements HandlerInterceptor {
         
         if (token != null) {
             try {
-                // 移除Bearer前缀
                 if (token.startsWith("Bearer ")) {
                     token = token.substring("Bearer ".length());
                     logger.debug("Extracted token: {}", token);
                 }
-                
                 // 验证token并获取userId
                 logger.debug("Validating token...");
                 if (jwtUtil.validateToken(token)) {

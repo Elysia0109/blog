@@ -79,19 +79,9 @@ public class ArticleController {
     }
 
     // 获取文章详情
-    @GetMapping("/{id}")
-    public ApiResponse<Map<String, Object>> getArticleById(@PathVariable Integer id) {
-        // 临时返回测试数据
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", id);
-        data.put("title", "测试文章标题");
-        data.put("category", "技术文章");
-        data.put("content", "这是文章详细内容...");
-        data.put("author", "测试作者");
-        data.put("createTime", new java.util.Date());
-
-        return ApiResponse.success(data);
-    }
+//    @GetMapping("/{id}")
+//    public ApiResponse<Map<String, Object>> getArticleById(@PathVariable Integer id) {
+//    }
 
     // 更新文章
     @PutMapping("/{id}")

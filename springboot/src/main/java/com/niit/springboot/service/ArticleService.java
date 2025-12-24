@@ -39,4 +39,5 @@ public interface ArticleService {
 
     // 获取用户文章数
     Integer countArticlesByAuthor(Integer authorId);
+
 }

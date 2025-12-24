@@ -70,7 +70,7 @@
                     size="small"
                     effect="light"
                 >
-                  {{ article.category }}
+                  {{ getCategoryName(article.category) }}
                 </el-tag>
               </div>
 
@@ -161,14 +161,24 @@ const formatTime = (time) => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-// 根据分类获取标签类型
+// 根据分类获取标签类型 - 修改为英文
 const getCategoryType = (category) => {
   const typeMap = {
-    '技术文章': 'primary',
-    '生活随笔': 'success',
-    '学习笔记': 'warning'
+    'tech': 'primary',
+    'life': 'success',
+    'study': 'warning'
   }
   return typeMap[category] || 'info'
+}
+
+// 新增：英文转中文的映射
+const getCategoryName = (category) => {
+  const categoryMap = {
+    'tech': '技术文章',
+    'life': '生活随笔',
+    'study': '学习笔记'
+  }
+  return categoryMap[category] || category
 }
 
 // 筛选文章

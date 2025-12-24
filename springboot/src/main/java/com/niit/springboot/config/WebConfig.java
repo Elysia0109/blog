@@ -1,4 +1,3 @@
-// 新建文件：WebConfig.java
 package com.niit.springboot.config;
 
 import com.niit.springboot.utils.JwtInterceptor;

@@ -20,7 +20,7 @@
           <div class="article-header">
             <div class="article-title">{{ article.title }}</div>
             <el-tag size="small" :type="getCategoryType(article.category)">
-              {{ article.category }}
+              {{ getCategoryName(article.category) }}
             </el-tag>
           </div>
           <!-- 文章信息 -->
@@ -83,14 +83,25 @@ const total = ref(0)
 const isLoggedIn = ref(false)
 const collectedArticles = ref([])
 
-// 辅助函数（保持不变）
+// 辅助函数
 const getCategoryType = (category) => {
+  // 根据英文分类名返回类型
   const typeMap = {
-    '技术文章': 'primary',
-    '生活随笔': 'success',
-    '学习笔记': 'warning'
+    'tech': 'primary',
+    'life': 'success',
+    'study': 'warning'
   }
   return typeMap[category] || 'info'
+}
+
+// 新增：英文转中文的映射
+const getCategoryName = (category) => {
+  const categoryMap = {
+    'tech': '技术文章',
+    'life': '生活随笔',
+    'study': '学习笔记'
+  }
+  return categoryMap[category] || category
 }
 
 const formatTime = (time) => {
@@ -108,7 +119,7 @@ const isCollected = (articleId) => {
   return collectedArticles.value && collectedArticles.value.some(id => id === articleId)
 }
 
-// 计算属性（保持不变）
+// 计算属性
 const pageTitle = computed(() => {
   const path = route.path
 
@@ -139,7 +150,6 @@ const pageTitle = computed(() => {
 })
 
 const pageDescription = computed(() => {
-  // 保持不变
   const path = route.path
 
   if (path.startsWith('/category/')) {
@@ -179,7 +189,7 @@ const noDataText = computed(() => {
   return '暂无文章'
 })
 
-// 获取请求参数（保持不变）
+// 获取请求参数 - 保持英文传递给后端
 const getRequestParams = () => {
   const path = route.path
   const params = {
@@ -188,13 +198,8 @@ const getRequestParams = () => {
   }
 
   if (path.startsWith('/category/')) {
-    const category = route.params.category
-    const categoryMap = {
-      'tech': '技术文章',
-      'life': '生活随笔',
-      'study': '学习笔记'
-    }
-    params.category = categoryMap[category] || category
+    // 直接传递英文分类名给后端
+    params.category = route.params.category  // tech, life, study
   }
 
   if (path.startsWith('/search/')) {
@@ -215,15 +220,13 @@ const getRequestParams = () => {
   return params
 }
 
-
-// 加载文章 - 使用 request.js
+// 加载文章
 const loadArticles = async () => {
   try {
     loading.value = true
 
     const params = getRequestParams()
 
-    // 使用统一的request实例发送请求
     const res = await request.get('/articles', {
       params: params
     })
@@ -235,7 +238,7 @@ const loadArticles = async () => {
       if (route.path === '/favorites' && res.data?.collectedIds) {
         collectedArticles.value = res.data.collectedIds
       }
-    }else {
+    } else {
       articles.value = []
       total.value = 0
       console.error('获取文章列表失败:', res.message)
@@ -249,7 +252,7 @@ const loadArticles = async () => {
   }
 }
 
-// 分页事件处理（保持不变）
+// 分页事件处理
 const handleSizeChange = (val) => {
   pageSize.value = val
   currentPage.value = 1
@@ -261,22 +264,21 @@ const handleCurrentChange = (val) => {
   loadArticles()
 }
 
-// 阅读文章（保持不变）
+// 阅读文章
 const readArticle = (articleId) => {
   console.log('阅读文章:', articleId)
 }
 
-// 收藏文章 - 使用 request.js
+// 收藏文章
 const collectArticle = async (articleId) => {
   if (!isLoggedIn.value) {
-    ElMessage.warning('请先登录后再收藏文章！')  // 添加了提示
+    ElMessage.warning('请先登录后再收藏文章！')
     return
   }
 
   try {
     const isCurrentlyCollected = isCollected(articleId)
 
-    // 使用统一的request实例发送请求
     const res = await request({
       url: '/articles/collect',
       method: isCurrentlyCollected ? 'DELETE' : 'POST',
@@ -295,17 +297,17 @@ const collectArticle = async (articleId) => {
   }
 }
 
-// 初始化（保持不变）
+// 初始化
 onMounted(() => {
   checkLoginStatus()
   loadArticles()
 })
 
-// 监听路由变化（保持不变）
+// 监听路由变化
 watch(
     () => route.path,
     () => {
-      currentPage.value = 1  // 路由变化时重置页码
+      currentPage.value = 1
       checkLoginStatus()
       loadArticles()
     }
