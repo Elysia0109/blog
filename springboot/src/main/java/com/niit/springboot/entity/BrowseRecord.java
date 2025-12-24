@@ -10,5 +10,5 @@ public class BrowseRecord {
     private Integer userId;
     private Integer articleId;
     private LocalDateTime browseTime;
-    private Integer duration;  // 浏览时长（秒）
+    private Integer duration;
 }

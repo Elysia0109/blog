@@ -19,7 +19,6 @@ public class UserController {
 
     @PostMapping("/register")
     public ApiResponse<UserInfoResponse> register(@RequestBody RegisterRequest request) {
-        // 在Service层手动验证参数
         if (request.getAccount() == null || request.getAccount().trim().isEmpty()) {
             return ApiResponse.error(400, "账号不能为空");
         }
@@ -37,6 +36,9 @@ public class UserController {
     @GetMapping("/me")
     public ApiResponse<UserInfoResponse> getCurrentUserInfo(HttpServletRequest request) {
         Integer userId = getUserIdFromRequest(request);
+        if (userId == null) {
+            return ApiResponse.error(401, "用户未登录");
+        }
         return ApiResponse.success(userService.getCurrentUserInfo(userId));
     }
 
@@ -45,6 +47,9 @@ public class UserController {
             HttpServletRequest httpRequest,
             @RequestBody UserInfoResponse userInfo) {
         Integer userId = getUserIdFromRequest(httpRequest);
+        if (userId == null) {
+            return ApiResponse.error(401, "用户未登录");
+        }
         return ApiResponse.success(userService.updateUserInfo(userId, userInfo));
     }
 
@@ -54,11 +59,14 @@ public class UserController {
             @RequestParam String oldPassword,
             @RequestParam String newPassword) {
         Integer userId = getUserIdFromRequest(request);
+        if (userId == null) {
+            return ApiResponse.error(401, "用户未登录");
+        }
         userService.changePassword(userId, oldPassword, newPassword);
         return ApiResponse.success();
     }
 
-    // 从请求头中获取用户ID（需要实现JWT解析）
+    // 从请求属性中获取用户ID
     private Integer getUserIdFromRequest(HttpServletRequest request) {
         Object userId = request.getAttribute("userId");
         return userId != null ? (Integer) userId : null;

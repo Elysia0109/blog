@@ -62,8 +62,10 @@
         #{title}, #{category}, #{content}, #{summary}, #{coverImage},
         #{authorId}, #{authorName}, 0, 0, 0, 0,
         #{status}, #{isTop}, 0,
-        <if test="publishTime != null">#{publishTime},</if>
-        <if test="publishTime == null">NOW(),</if>
+        <choose>
+            <when test="publishTime != null">#{publishTime},</when>
+            <otherwise>NOW(),</otherwise>
+        </choose>
         NOW(), NOW()
         )
     </insert>
@@ -139,6 +141,37 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- 根据ID列表获取文章 -->
+    <select id="selectArticlesByIds" resultMap="ListResultMap">
+        SELECT <include refid="List_Column_List" />
+        FROM articles
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status = 1 AND is_deleted = 0
+        ORDER BY
+        <foreach collection="ids" item="id" open="FIELD(id," separator="," close=")" index="index">
+            #{id}
+        </foreach>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 搜索文章 -->
+    <select id="searchArticles" resultMap="ListResultMap">
+        SELECT <include refid="List_Column_List" />
+        FROM articles
+        WHERE status = 1
+        AND is_deleted = 0
+        AND (
+        title LIKE CONCAT('%', #{keyword}, '%')
+        OR content LIKE CONCAT('%', #{keyword}, '%')
+        OR summary LIKE CONCAT('%', #{keyword}, '%')
+        )
+        ORDER BY publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
     <!-- 置顶/取消置顶 -->
     <update id="toggleTop">
         UPDATE articles
@@ -165,6 +198,19 @@
         SELECT COUNT(*)
         FROM articles
         WHERE author_id = #{authorId} AND status = 1 AND is_deleted = 0
+    </select>
+
+    <!-- 统计搜索结果数量 -->
+    <select id="countSearchArticles" resultType="int">
+        SELECT COUNT(*)
+        FROM articles
+        WHERE status = 1
+          AND is_deleted = 0
+          AND (
+            title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                OR summary LIKE CONCAT('%', #{keyword}, '%')
+            )
     </select>
 
 </mapper>

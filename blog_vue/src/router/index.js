@@ -68,6 +68,11 @@ const routes = [
                     requiresAuth: true,
                     title: '编辑文章'
                 }
+            },
+            {
+                path: 'article/:id',
+                component: () => import('../views/ArticleDetail.vue'),
+                meta: { title: '文章详情' }
             }
         ]
     },

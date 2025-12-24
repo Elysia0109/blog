@@ -20,7 +20,11 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> success() {
-        return success(null);
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setCode(200);
+        response.setMessage("success");
+        response.setData(null);
+        return response;
     }
 
     // 错误响应
@@ -32,6 +36,7 @@ public class ApiResponse<T> {
         ApiResponse<T> response = new ApiResponse<>();
         response.setCode(code);
         response.setMessage(message);
+        response.setData(null);
         return response;
     }
 

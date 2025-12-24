@@ -68,11 +68,13 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router' // 添加 useRouter
 import { User, Clock } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import { ElEmpty, ElCard, ElTag, ElButton, ElIcon, ElPagination, ElSkeleton, ElMessage } from 'element-plus'
+
 const route = useRoute()
+const router = useRouter()
 
 // 响应式数据
 const articles = ref([])
@@ -264,9 +266,9 @@ const handleCurrentChange = (val) => {
   loadArticles()
 }
 
-// 阅读文章
+// 阅读文章 - 使用 router.push
 const readArticle = (articleId) => {
-  console.log('阅读文章:', articleId)
+  router.push(`/article/${articleId}`)
 }
 
 // 收藏文章

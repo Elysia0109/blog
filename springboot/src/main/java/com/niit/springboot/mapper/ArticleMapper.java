@@ -4,6 +4,7 @@ import com.niit.springboot.entity.Article;
 import com.niit.springboot.dto.response.ArticleListResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 @Mapper
@@ -43,6 +44,18 @@ public interface ArticleMapper {
             @Param("offset") Integer offset,
             @Param("limit") Integer limit);
 
+    // 根据ID列表获取文章
+    List<ArticleListResponse> selectArticlesByIds(
+            @Param("ids") List<Integer> ids,
+            @Param("offset") Integer offset,
+            @Param("limit") Integer limit);
+
+    // 搜索文章
+    List<ArticleListResponse> searchArticles(
+            @Param("keyword") String keyword,
+            @Param("offset") Integer offset,
+            @Param("limit") Integer limit);
+
     // 置顶/取消置顶
     int toggleTop(@Param("id") Integer id, @Param("isTop") Integer isTop);
 
@@ -54,4 +67,7 @@ public interface ArticleMapper {
 
     // 统计用户文章数
     int countArticlesByAuthor(Integer authorId);
+
+    // 统计搜索结果数量
+    int countSearchArticles(String keyword);
 }

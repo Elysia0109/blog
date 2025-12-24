@@ -2,7 +2,7 @@ package com.niit.springboot.controller;
 
 import com.niit.springboot.dto.request.LoginRequest;
 import com.niit.springboot.dto.response.ApiResponse;
-import com.niit.springboot.dto.LoginResponse;
+import com.niit.springboot.dto.response.LoginResponse;
 import com.niit.springboot.service.UserService;
 import com.niit.springboot.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;

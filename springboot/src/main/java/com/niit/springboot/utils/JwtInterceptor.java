@@ -18,11 +18,10 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         logger.debug("Processing request: {} {}", request.getMethod(), request.getRequestURI());
-        
         // 从Authorization头获取token并解析用户ID
         String token = request.getHeader("Authorization");
         logger.debug("Authorization header: {}", token);
-        
+
         if (token != null) {
             try {
                 if (token.startsWith("Bearer ")) {
