@@ -236,9 +236,12 @@ const loadArticles = async () => {
       articles.value = res.data?.list || res.list || res.articles || []
       total.value = res.data?.total || res.total || 0
 
-      // 如果是收藏页面，获取收藏列表
-      if (route.path === '/favorites' && res.data?.collectedIds) {
+      // 无论在哪个页面，只要用户已登录，就获取收藏列表
+      if (isLoggedIn.value && res.data?.collectedIds) {
         collectedArticles.value = res.data.collectedIds
+      } else if (!isLoggedIn.value) {
+        // 如果用户未登录，清空收藏列表
+        collectedArticles.value = []
       }
     } else {
       articles.value = []
@@ -282,9 +285,8 @@ const collectArticle = async (articleId) => {
     const isCurrentlyCollected = isCollected(articleId)
 
     const res = await request({
-      url: '/articles/collect',
-      method: isCurrentlyCollected ? 'DELETE' : 'POST',
-      data: { articleId: articleId }
+      url: `/articles/${articleId}/collect`,
+      method: isCurrentlyCollected ? 'DELETE' : 'POST'
     })
 
     if (res.code === 200) {

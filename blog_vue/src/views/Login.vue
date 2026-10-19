@@ -118,11 +118,10 @@ async function login() {
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .login-container {
   height: 100vh;
   overflow: hidden;
-  background-image: url("https://img-s.msn.cn/tenant/amp/entityid/BB1msDBQ?w=0&h=0&q=60&m=6&f=jpg&u=t");
+  background-image: url("https://www.bizhigq.com/pc-img/2023-05/g3039.jpg");
   background-size: cover;
   background-position: 0-50px;
 }

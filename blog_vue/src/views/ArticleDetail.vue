@@ -10,7 +10,7 @@
           </el-tag>
           <div class="meta-info">
             <span class="author">
-              <el-avatar :size="24" :src="article.authorAvatar" />
+              <el-avatar :size="24" :src="getValidAvatar(article.authorAvatar)" />
               <span>{{ article.authorName }}</span>
             </span>
             <span class="time">
@@ -129,8 +129,8 @@
             :class="{ 'reply-mode': comment.parentId }"
         >
           <div class="comment-avatar">
-            <el-avatar :size="40" :src="comment.userAvatar" />
-          </div>
+              <el-avatar :size="40" :src="getValidAvatar(comment.avatar)" />
+            </div>
           <div class="comment-content">
             <div class="comment-header">
               <span class="comment-user">{{ comment.username }}</span>
@@ -167,7 +167,7 @@
                   class="reply-item"
               >
                 <div class="reply-avatar">
-                  <el-avatar :size="32" :src="reply.userAvatar" />
+                  <el-avatar :size="32" :src="getValidAvatar(reply.avatar)" />
                 </div>
                 <div class="reply-content">
                   <div class="reply-header">
@@ -261,6 +261,26 @@ const isAuthor = computed(() => {
   return isLoggedIn.value && currentUser.value && currentUser.value.id === article.value.authorId
 })
 
+// 默认头像
+const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+
+// 获取有效头像URL的辅助函数
+const getValidAvatar = (avatar) => {
+  try {
+    if (!avatar || typeof avatar !== 'string') return defaultAvatar
+    const trimmedAvatar = avatar.trim()
+    if (!trimmedAvatar) return defaultAvatar
+    if (trimmedAvatar.startsWith('http://') || trimmedAvatar.startsWith('https://')) {
+      return trimmedAvatar
+    }
+    console.warn('评论头像URL格式不正确:', trimmedAvatar)
+    return defaultAvatar
+  } catch (error) {
+    console.error('处理评论头像URL时出错:', error)
+    return defaultAvatar
+  }
+}
+
 // 辅助函数
 const getCategoryType = (category) => {
   const typeMap = {
@@ -341,7 +361,14 @@ const loadArticle = async () => {
     const res = await request.get(`/articles/${articleId}`)
 
     if (res.code === 200) {
-      article.value = res.data || res
+      const articleData = res.data || res
+      
+      // 字段映射：将后端的isFavorite映射为前端的isCollected
+      if (articleData.isFavorite !== undefined) {
+        articleData.isCollected = articleData.isFavorite;
+      }
+      
+      article.value = articleData
 
       // 增加阅读量
       await request.post(`/articles/${articleId}/view`)

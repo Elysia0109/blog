@@ -13,6 +13,7 @@ public class ArticleDetailResponse {
     private String coverImage;
     private Integer authorId;
     private String authorName;
+    private String authorAvatar; // 作者头像
     private Integer viewCount;
     private Integer likeCount;
     private Integer collectCount;

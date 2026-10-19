@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
                 request.getNickname() : request.getUsername());
         user.setPassword(PasswordUtil.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setAvatar("/default-avatar.png"); // 默认头像
+        user.setAvatar("https://niit-pro.oss-cn-guangzhou.aliyuncs.com/avatars/88ac8441e22344a3a67ea0c262966191.ico?Expires=1766627914&OSSAccessKeyId=TMP.3Ko88rXTiUBxPFcmo7FPcbNPQSaLszYKvyyRLt1hNKHCqcpomC5W41bW8wmYAW4Cc2TcHvKZh1gtK1bqiaM8HfuJK1xNSK&Signature=N3fyiluGzaH%2FSI6kLVFWlaMvTTY%3D");
         user.setStatus(1); // 正常状态
 
         userMapper.insert(user);
@@ -86,6 +86,10 @@ public class UserServiceImpl implements UserService {
 
         // 更新用户信息
         boolean updated = false;
+        if (StringUtils.hasText(userInfo.getUsername())) {
+            user.setUsername(userInfo.getUsername());
+            updated = true;
+        }
         if (StringUtils.hasText(userInfo.getNickname())) {
             user.setNickname(userInfo.getNickname());
             updated = true;

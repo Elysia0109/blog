@@ -123,6 +123,12 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleDetailResponse response = new ArticleDetailResponse();
         BeanUtils.copyProperties(article, response);
 
+        // 获取作者信息，设置头像
+        User author = userMapper.selectById(article.getAuthorId());
+        if (author != null) {
+            response.setAuthorAvatar(author.getAvatar());
+        }
+
         // 返回前增加阅读量
         articleMapper.incrementViewCount(id);
 

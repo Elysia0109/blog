@@ -255,7 +255,6 @@ const validateForm = () => {
   return isValid
 }
 
-// 提交表单 - 使用 request.js
 // 提交表单
 const submitForm = async () => {
   console.log('开始提交文章...')
@@ -285,7 +284,7 @@ const submitForm = async () => {
       content: form.value.content
     }
 
-    console.log('📤 发送请求数据:', requestData)
+    console.log('发送请求数据:', requestData)
 
     let res
 
@@ -329,7 +328,6 @@ const submitForm = async () => {
   } catch (error) {
     console.error(' 请求失败:', error)
 
-    // 更详细的错误处理
     if (error.code === 401) {
       ElMessage.error('登录已过期，请重新登录')
       localStorage.clear()

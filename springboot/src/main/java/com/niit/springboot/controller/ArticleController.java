@@ -97,9 +97,9 @@ public class ArticleController {
             logger.debug("获取全部文章: {}篇", articles.size());
         }
 
-        // 如果是收藏或浏览记录页面，需要获取收藏状态
-        if ((favorites != null && favorites) || (record != null && record)) {
-            List<Integer> favoriteIds = userId != null ? favoriteService.getUserFavorites(userId) : List.of();
+        // 只要用户已登录，就返回收藏状态
+        if (userId != null) {
+            List<Integer> favoriteIds = favoriteService.getUserFavorites(userId);
             data.put("collectedIds", favoriteIds);
         }
 
@@ -251,35 +251,35 @@ public class ArticleController {
         return ApiResponse.success();
     }
 
-    // 收藏文章 - 修改为使用@RequestBody
-    @PostMapping("/collect")
-    public ApiResponse<Void> collectArticle(@RequestBody CollectRequest collectRequest,
+    // 收藏文章
+    @PostMapping("/{id}/collect")
+    public ApiResponse<Void> collectArticle(@PathVariable Integer id,
                                             HttpServletRequest request) {
-        logger.debug("收藏文章，文章ID: {}", collectRequest.getArticleId());
+        logger.debug("收藏文章，文章ID: {}", id);
         Integer userId = getUserIdFromRequest(request);
         if (userId == null) {
             return ApiResponse.error(401, "请先登录");
         }
 
-        favoriteService.addFavorite(userId, collectRequest.getArticleId());
+        favoriteService.addFavorite(userId, id);
 
-        logger.debug("用户{}收藏文章{}", userId, collectRequest.getArticleId());
+        logger.debug("用户{}收藏文章{}", userId, id);
         return ApiResponse.success();
     }
 
-    // 取消收藏 - 修改为使用@RequestBody
-    @DeleteMapping("/collect")
-    public ApiResponse<Void> cancelCollect(@RequestBody CollectRequest collectRequest,
+    // 取消收藏
+    @DeleteMapping("/{id}/collect")
+    public ApiResponse<Void> cancelCollect(@PathVariable Integer id,
                                            HttpServletRequest request) {
-        logger.debug("取消收藏文章，文章ID: {}", collectRequest.getArticleId());
+        logger.debug("取消收藏文章，文章ID: {}", id);
         Integer userId = getUserIdFromRequest(request);
         if (userId == null) {
             return ApiResponse.error(401, "请先登录");
         }
 
-        favoriteService.removeFavorite(userId, collectRequest.getArticleId());
+        favoriteService.removeFavorite(userId, id);
 
-        logger.debug("用户{}取消收藏文章{}", userId, collectRequest.getArticleId());
+        logger.debug("用户{}取消收藏文章{}", userId, id);
         return ApiResponse.success();
     }
 

@@ -5,28 +5,6 @@
       <div class="page-title">我的文章</div>
       <div class="page-description">管理您发表的所有文章</div>
     </div>
-
-    <!-- 筛选工具栏 -->
-    <el-card class="filter-card" shadow="never">
-      <div class="filter-bar">
-        <el-input
-            v-model="searchText"
-            placeholder="搜索文章标题或内容"
-            clearable
-            @keyup.enter="filterArticles"
-            @clear="clearFilter"
-            class="search-input"
-        >
-          <template #append>
-            <el-button @click="filterArticles">
-              <el-icon><Search /></el-icon>
-            </el-button>
-          </template>
-        </el-input>
-        <el-button @click="clearFilter" plain>清空筛选</el-button>
-      </div>
-    </el-card>
-
     <!-- 内容区域 -->
     <el-card class="content-card">
       <!-- 未登录状态 -->

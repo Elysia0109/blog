@@ -62,7 +62,7 @@
           <div v-if="isLoggedIn" class="user-info">
             <el-dropdown @command="handleUserCommand">
               <span class="user-dropdown">
-                <el-avatar :size="30" :src="'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg'" />
+                <el-avatar :size="30" :src="avatarUrl" />
                 <span class="username">{{ username }}</span>
                 <el-icon><arrow-down /></el-icon>
               </span>
@@ -112,7 +112,7 @@
           <div class="profile-header">
             <el-avatar
                 :size="80"
-                :src="isLoggedIn ? 'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg' : ''"
+                :src="isLoggedIn ? avatarUrl : ''"
                 class="profile-avatar"
             />
             <div class="profile-info">
@@ -186,10 +186,11 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import {ArrowDown, Clock, Document, EditPen, Search, Setting, Star} from "@element-plus/icons-vue";
+import {ArrowDown, Clock, Document, EditPen, Search, Setting, Star} from "@element-plus/icons-vue"
+import emitter from '@/utils/eventBus'  // 导入事件总线
 
 const router = useRouter()
 const route = useRoute()
@@ -202,6 +203,30 @@ const activeNav = ref('home')
 const activeMenu = ref('')
 const searchText = ref('')
 const sidebarCollapsed = ref(false)
+const userAvatar = ref('')  // 专门存储头像URL
+
+// 计算属性：完整的头像URL
+const avatarUrl = computed(() => {
+  return getValidAvatar(userAvatar.value)
+})
+
+// 处理头像URL
+const getValidAvatar = (avatar) => {
+  try {
+    const defaultAvatar = 'https://ts1.tc.mm.bing.net/th/id/OIP-C.XEkMn3xE4iFIzIB5DNE9fgHaHa?w=193&h=193&c=8&rs=1&qlt=90&o=6&cb=ucfimg1&dpr=1.1&pid=3.1&rm=2&ucfimg=1'
+    if (!avatar || typeof avatar !== 'string') return defaultAvatar
+    const trimmedAvatar = avatar.trim()
+    if (!trimmedAvatar) return defaultAvatar
+    if (trimmedAvatar.startsWith('http://') || trimmedAvatar.startsWith('https://')) {
+      return trimmedAvatar
+    }
+    console.warn('头像URL格式不正确:', trimmedAvatar)
+    return defaultAvatar
+  } catch (error) {
+    console.error('处理头像URL时出错:', error)
+    return 'https://ts1.tc.mm.bing.net/th/id/OIP-C.XEkMn3xE4iFIzIB5DNE9fgHaHa?w=193&h=193&c=8&rs=1&qlt=90&o=6&cb=ucfimg1&dpr=1.1&pid=3.1&rm=2&ucfimg=1'
+  }
+}
 
 // 检查登录状态
 const checkLoginStatus = () => {
@@ -210,10 +235,23 @@ const checkLoginStatus = () => {
 
   // 从 localStorage 获取用户信息
   const userInfoStr = localStorage.getItem('userInfo')
+  console.log('localStorage中的userInfo:', userInfoStr)
   if (userInfoStr) {
-    const userInfo = JSON.parse(userInfoStr)
-    username.value = userInfo.nickname || userInfo.username
-    userId.value = userInfo.id
+    try {
+      const userInfo = JSON.parse(userInfoStr)
+      console.log('解析后的userInfo:', userInfo)
+      username.value = userInfo.nickname || userInfo.username
+      userId.value = userInfo.id
+      userAvatar.value = userInfo.avatar || ''  // 设置头像
+      console.log('头像URL:', userAvatar.value)
+      console.log('头像URL类型:', typeof userAvatar.value)
+      console.log('头像URL startsWith http:', userAvatar.value.startsWith('http'))
+      console.log('用户信息加载成功:', { username: username.value, avatar: userAvatar.value })
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  } else {
+    console.log('未找到用户信息')
   }
 }
 
@@ -284,6 +322,7 @@ const logout = () => {
   isLoggedIn.value = false
   username.value = ''
   userId.value = ''
+  userAvatar.value = ''  // 清空头像
 
   if (['/my-articles', '/favorites', '/record', '/setting', '/publish'].some(path => route.path.startsWith(path))) {
     router.push('/')
@@ -393,10 +432,60 @@ const updateActiveState = () => {
   }
 }
 
+// 处理头像更新事件
+const handleAvatarUpdated = (newAvatar) => {
+  console.log('收到头像更新事件，新头像URL:', newAvatar)
+  userAvatar.value = newAvatar
+
+  // 同时更新本地存储
+  const userInfoStr = localStorage.getItem('userInfo')
+  if (userInfoStr) {
+    try {
+      const userInfo = JSON.parse(userInfoStr)
+      userInfo.avatar = newAvatar
+      localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    } catch (e) {
+      console.error('更新本地存储失败:', e)
+    }
+  }
+}
+
+// 处理storage变化事件（备用方案）
+const handleStorageChange = (event) => {
+  if (event.key === 'userInfo' && event.newValue) {
+    try {
+      const userInfo = JSON.parse(event.newValue)
+      if (userInfo.avatar && userAvatar.value !== userInfo.avatar) {
+        console.log('通过storage事件更新头像:', userInfo.avatar)
+        userAvatar.value = userInfo.avatar
+      }
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  }
+}
+
 // 初始化
 onMounted(() => {
   checkLoginStatus()
   updateActiveState()
+
+  // 监听头像更新事件
+  emitter.on('avatar-updated', handleAvatarUpdated)
+
+  // 监听storage变化（作为备用方案）
+  window.addEventListener('storage', handleStorageChange)
+
+  console.log('Layout组件已挂载，事件监听已设置')
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  // 移除事件监听
+  emitter.off('avatar-updated', handleAvatarUpdated)
+  window.removeEventListener('storage', handleStorageChange)
+
+  console.log('Layout组件已卸载，事件监听已清理')
 })
 
 // 监听路由变化
@@ -734,6 +823,7 @@ watch(() => route.path, () => {
     width: 120px;
   }
 }
+
 .user-info {
   .user-dropdown {
     display: flex;

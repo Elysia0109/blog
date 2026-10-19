@@ -3,15 +3,20 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/niit_pro?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
-    password: root
+    password: 123456
 
-  # MyBatis配置
+  servlet:
+    multipart:
+      max-file-size: 10MB     # 单个文件最大大小
+      max-request-size: 10MB  # 单次请求最大大小
+
+# MyBatis配置
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.niit.springboot.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 开发环境打印SQL
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 服务器配置
 server:
@@ -24,3 +29,12 @@ logging:
   level:
     com.niit.springboot: debug
     org.springframework.web: info
+
+# 阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: oss-cn-guangzhou.aliyuncs.com  # OSS服务端点
+    access-key-id: ${ALIBABA_CLOUD_ACCESS_KEY_ID}
+    access-key-secret: ${ALIBABA_CLOUD_ACCESS_KEY_SECRET}
+    bucket-name: niit-pro
+    host: https://niit-pro.oss-cn-guangzhou.aliyuncs.com
